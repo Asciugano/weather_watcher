@@ -33,11 +33,12 @@ static size_t write_callback(void *data, size_t size, size_t nmemb,
   return real_size;
 }
 
-void fetch_weather_data() {
+WeatherData fetch_weather_data() {
   CURL *curl;
   CURLcode res;
 
   Memory chunk = {.res = NULL, .size = 0};
+  WeatherData data = {0};
 
   char url[512];
   snprintf(url, sizeof(url), URL_FORMAT, CITY, API_KEY);
@@ -45,7 +46,7 @@ void fetch_weather_data() {
   curl = curl_easy_init();
   if (!curl) {
     fprintf(stderr, "Errore inizializzazione di CURL\n");
-    return;
+    return data;
   }
 
   curl_easy_setopt(curl, CURLOPT_URL, url);
@@ -57,7 +58,7 @@ void fetch_weather_data() {
     fprintf(stderr, "Errore nella richiesta: %s\n", curl_easy_strerror(res));
     curl_easy_cleanup(curl);
     free(chunk.res);
-    return;
+    return data;
   }
 
   curl_easy_cleanup(curl);
@@ -69,7 +70,7 @@ void fetch_weather_data() {
 
   if (!root) {
     fprintf(stderr, "Errore nel parsing del JSON: %s\n", error.text);
-    return;
+    return data;
   }
 
   json_t *main = json_object_get(root, "main");
@@ -77,17 +78,22 @@ void fetch_weather_data() {
   json_t *name = json_object_get(root, "name");
 
   if (main && weather_array && json_is_array(weather_array)) {
-    float temp = json_number_value(json_object_get(main, "temp"));
-    const char *desc = json_string_value(
+    data.temp = json_number_value(json_object_get(main, "temp"));
+    data.desc = json_string_value(
         json_object_get(json_array_get(weather_array, 0), "description"));
-    const char *city_name = json_string_value(name);
+    data.city = json_string_value(name);
 
-    printf("Citta': %s\n", city_name);
-    printf("Temperatura: %.2f°C\n", temp);
-    printf("Descrizione: %s\n", desc);
+    printf("Citta': %s\n", data.city);
+    printf("Temperatura: %.2f°C\n", data.temp);
+    printf("Descrizione: %s\n", data.desc);
+
+    return data;
   } else {
     fprintf(stderr, "Dati JSON mancanti o malformati.\n");
+    return data;
   }
 
   json_decref(root);
+
+  return data;
 }
