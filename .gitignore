@@ -1,0 +1,43 @@
+# Compilati
+*.o
+*.a
+*.so
+*.out
+*.exe
+
+# Cartella build
+build/
+
+# File generati da make
+weather-watcher
+
+# File di debug
+core
+*.log
+
+# File di sistema/macOS
+.DS_Store
+
+# Compilation DB
+compile_commands.json
+
+# Backup e temporanei
+*~
+*.swp
+*.tmp
+
+# CLion / VSCode
+.idea/
+.vscode/
+
+# Perl-related (in caso ne usi)
+local/
+perl5/
+
+# Raylib example assets (in caso)
+*.wav
+*.ogg
+*.png
+*.bmp
+
+.cache/
