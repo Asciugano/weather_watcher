@@ -1,16 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include <curl/curl.h>
-#include <jansson.h>
-
 #include "weather.h"
-
-#define API_KEY "000dd6ca5191e08135cc4d67aaa175bc"
-#define CITY "Milan"
-#define URL_FORMAT                                                             \
-  "https://api.openweathermap.org/data/2.5/weather?q=%s&appid=%s&units=metric"
+#include "raylib.h"
 
 typedef struct {
   char *res;
@@ -33,7 +22,7 @@ static size_t write_callback(void *data, size_t size, size_t nmemb,
   return real_size;
 }
 
-WeatherData fetch_weather_data() {
+WeatherData fetch_weather_data(const char *city) {
   CURL *curl;
   CURLcode res;
 
@@ -41,7 +30,7 @@ WeatherData fetch_weather_data() {
   WeatherData data = {0};
 
   char url[512];
-  snprintf(url, sizeof(url), URL_FORMAT, CITY, API_KEY);
+  snprintf(url, sizeof(url), URL_FORMAT, city, API_KEY);
 
   curl = curl_easy_init();
   if (!curl) {
@@ -96,4 +85,20 @@ WeatherData fetch_weather_data() {
   json_decref(root);
 
   return data;
+}
+
+#define INFO_WT 280
+#define INFO_HG 160
+
+void DrawWeatherInfo(float x, float y, WeatherData data) {
+
+  DrawRectangle(x, y, INFO_WT, INFO_HG, BLACK);
+  x += 20;
+  y += 20;
+  DrawText(TextFormat("Citta: %s", data.city), x + 3, y + 3, 20, WHITE);
+  y += 40;
+  DrawText(TextFormat("Temperatura: %.2f°C", data.temp), x + 3, y + 3, 20,
+           WHITE);
+  y += 40;
+  DrawText(TextFormat("Descrizione: %s", data.desc), x + 3, y + 3, 20, WHITE);
 }
